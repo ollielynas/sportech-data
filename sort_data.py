@@ -84,7 +84,8 @@ for row in data.itertuples(index=False):
     row_data = {}
 json = json.dumps(json_data, indent=0)
 with open('mega_data.json', 'w') as f:
+    json = json.replace('NaN', '0')
     f.write(json)
-    
-with gzip.open('sporttech_search/mega_data.json.gz', 'wt', encoding='utf-8') as zipfile:
+
+with gzip.open('sporttech_search/public/mega_data.json.gz', 'wt', encoding='utf-8') as zipfile:
     zipfile.write(json)
