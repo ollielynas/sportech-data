@@ -173,9 +173,9 @@ function getResults(name: string, club: string) {
     let lastName = person.FamilyName.toLowerCase();
     let clubs = person.Clubs.map((c: string) => c.toLowerCase());
     if (
-      (name === "" || fullName.startsWith(name)) &&
-      (name === "" || lastName.startsWith(name)) &&
-      (club === "" || clubs.some((c: string) => c.includes(club)))
+      ((name === "" || fullName.startsWith(name)) ||
+      (name === "" || lastName.startsWith(name)) )&&
+      (club === "" || clubs.some((c: string) => c.startsWith(club)))
     ) {
       results.push(person);
     }
