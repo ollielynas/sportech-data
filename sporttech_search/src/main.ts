@@ -1,16 +1,16 @@
-import decompressResponse from "decompress-response";
-
 let jsonData: any = {};
 let keys: string[] = [];
 
-
-
-
 document.getElementById("load_data")?.addEventListener("click", () => {
-  console.log("Fetching and decompressing the JSON file...");
+  console.log("Fetching and loading the JSON file...");
+
   fetch("./mega_data.json.gz")
-    .then((response) => decompressResponse(response))
-    .then((decompressedResponse) => decompressedResponse.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+      return response.json();
+    })
     .then((data) => {
       jsonData = data;
       keys = Object.keys(jsonData).filter(
@@ -22,13 +22,15 @@ document.getElementById("load_data")?.addEventListener("click", () => {
       )!.innerHTML = `Data loaded. ${keys.length} athletes available.`;
     })
     .catch((error) => {
-      console.error("Error fetching or decompressing the JSON file:", error);
+      console.error("Error fetching the JSON file:", error);
     });
+
   document.getElementById("load_data")?.setAttribute("style", "display:none");
   document
     .getElementById("search-window")
     ?.setAttribute("style", "display:block");
 });
+
 
 function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
   
