@@ -11,30 +11,36 @@
     <h2>SportTech Search</h2>
     <div class="inner">
     <div class="left">
-      <button id="load_data">Load Data</button>
+      
       <div class="data">
       </div>
       <div id="search-window" style="display:none;">
 
       <!-- labeld input box with search button umder it -->
         <br />
-        <label for="search-name">Search by Name:</label><br />
+        <label for="search-name">Search by Name:</label>
         <input type="text" id="search-name" placeholder="Name" />
         <br />
+        <label for="search-name">Search by Club:</label>
+        <input type="text" id="search-club" placeholder="Name" />
+        <br />
         <button id="search-button">Search</button>
-        <div id="results"></div>
+        <div id="results">
+
+        </div>
 
 
 
       </div>
+      <button id="load_data">Load Data</button>
     </div>
     <div class="right">
       <div id="profile">
-        
+
       </div>
     </div>
     </div>
-    <p>Data not loaded</p>
+    <p id="details">Data not loaded</p>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

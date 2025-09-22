@@ -1,29 +1,177 @@
+/* General Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #222;
+  background: #f8f9fa;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100vh;
+  overflow: hidden;
+  line-height: 1.5;
 }
 
+h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 1rem 0;
+  color: black;
+}
+
+/* Layout */
 .inner {
   display: flex;
   flex-direction: row;
   width: 100%;
   height: 100%;
+  border-top: 1px solid #ddd;
+}
+
+.left,
+.right {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background: #fff;
 }
 
 .left {
-  width: 50%;
-  float: left;
-  padding: 10px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  border-right: 1px solid #ddd;
 }
 
 .right {
-  width: 50%;
-  float: right;
-  padding: 10px;
-  box-sizing: border-box;
+  background: #fafafa;
+}
+
+/* Buttons */
+button {
+  display: inline-block;
+  /* background: #0d6efd; */
+  /* color: #fff; */
+  /* border: none; */
+  padding: 0.3rem 0.5rem;
+  /* margin: 0.3rem 0; */
+  /* font-size: 0.95rem; */
+  /* font-weight: 500; */ 
+  /* border-radius: 6px; */
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+/* button:hover {
+  background: #0b5ed7;
+} */
+
+button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Search Section */
+label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: block;
+  margin-top: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+#search-window {
+  margin-top: 1rem;
+}
+
+#results {
+  margin-top: 1rem;
+}
+
+#results p {
+  color: #555;
+  font-style: italic;
+}
+
+/* Person Buttons */
+.person {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #f1f3f5;
+  color: #222;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.person:hover {
+  background: #e9ecef;
+}
+
+/* Scores Section */
+#scores-div {
+  margin-top: 1rem;
+}
+
+.score-entry {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #222;
+  transition: background 0.2s ease;
+}
+
+.score-entry:hover {
+  background: #f1f3f5;
+}
+
+/* Typography refinements */
+#person-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+#person-clubs,
+#details,
+#scores-title {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inner {
+    flex-direction: column;
+  }
+  .left,
+  .right {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    max-height: 50%;
+  }
 }

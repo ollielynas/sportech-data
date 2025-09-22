@@ -12,7 +12,6 @@ i = 0
 for row in data.itertuples(index=False):
     
     name = (str(row.GivenName) + ' ' + str(row.Surname)).strip().lower()
-    name = ' '.join([part.capitalize() for part in name.split(' ')])
     event_key = row.Title + f" ({hash(row.Event_UUID)%1000})"
     routine_key = f"{row.Competition} {row.Stage} {row.Mark}" 
     if name not in json_data.keys():
@@ -20,9 +19,11 @@ for row in data.itertuples(index=False):
         json_data[name] = {
             'GivenName': row.GivenName,
             'FamilyName': row.Surname,
-            'Club': row.Representing,
+            'Clubs': [row.Representing],
             'Events': {}
         }
+    if row.Representing not in json_data[name]['Clubs']:
+        json_data[name]['Clubs'].append(row.Representing)
     person_data = json_data[name]
     events_data = person_data['Events']
     
@@ -66,8 +67,8 @@ for row in data.itertuples(index=False):
             event_dmt_routines[routine_key] = {
                 'Competition': row.Competition,
                 'Stage': row.Stage,
-                'Mark': row.Mark,
-                'Total Mark': row.Mark_Total,
+                'Score': row.Mark/1000,
+                'Total Score': row.Mark_Total/1000,
             }
         routine_data = event_dmt_routines[routine_key]
         if row.Judge in ["E4", "E3", "E2", "E1"]:
