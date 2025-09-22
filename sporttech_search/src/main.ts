@@ -86,9 +86,7 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
   }
   for (let scoreEntry of dmt_scores) {
     let score = scoreEntry.Score || "No Score";
-    let TOF = scoreEntry.TOF || "";
     let DIF = scoreEntry.DIF || "";
-    let HD = scoreEntry.HD || "";
     let EX = scoreEntry.EX_total || "";
     let Category = scoreEntry.Competition || "";
     let Routine = scoreEntry.Stage || "";
@@ -98,11 +96,11 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
     let E3 = scoreEntry.E3.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
     let E4 = scoreEntry.E4.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
     let li = document.createElement("button");
-    li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} TOF:${TOF} DIF:${DIF} HD:${HD}`;
+    li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} DIF:${DIF}`;
     li.className = "score-entry";
     li.onclick = () => {
       alert(
-        `Details:\nCategory: ${Category}\nRoutine: ${Routine}\nScore: ${score}\nEX:${EX}\nTOF: ${TOF}\nDIF: ${DIF}\nHD: ${HD}`
+        `Details:\nCategory: ${Category}\nRoutine: ${Routine}\nScore: ${score}\nEX:${EX}\nDIF: ${DIF}`
         + `\n      S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, L,  A`
         + `\nE1: ${E1}\nE2: ${E2}\nE3: ${E3}\nE4: ${E4}`
       );
@@ -161,6 +159,150 @@ function totalPointsEver(person: any) {
   return total;
 }
 
+function sortPeople(people: any[]) {
+        //   <select name="Sort By" id="sort">
+        //   <option value="HighestTRA">Highest Tramp Score</option>
+        //   <option value="HighestTRA_EX">Highest Tramp EX</option>
+        //   <option value="HighestTRA_HD">Highest Tramp HD</option>
+        //   <option value="HighestTRA_TOF">Highest Tramp TOF</option>
+        //   <option value="HighestDMT_EX">Highest DMT EX</option>
+        //   <option value="HighestDMT">Highest DMT Score</option>
+        //   <option value="HighestTotal">Highest Total</option>
+          
+        // </select>
+
+        let selector = (document.getElementById("sort") as HTMLSelectElement).value;
+        console.log("Sorting by:", selector);
+        if (selector === "HighestTRA") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { Score?: number }).Score || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { Score?: number }).Score || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else if (selector === "HighestDMT") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let dmt_scores = Object.values(event.DMT_routines);
+              for (let scoreEntry of dmt_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { Score?: number }).Score || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let dmt_scores = Object.values(event.DMT_routines);
+              for (let scoreEntry of dmt_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { Score?: number }).Score || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else if (selector === "HighestTotal") {
+          people.sort((a, b) => totalPointsEver(b) - totalPointsEver(a));
+
+        } else if (selector === "HighestTRA_EX") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else if (selector === "HighestTRA_HD") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { HD?: number }).HD || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { HD?: number }).HD || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else if (selector === "HighestTRA_TOF") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { TOF?: number }).TOF || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let tra_scores = Object.values(event.TRA_routines);
+              for (let scoreEntry of tra_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { TOF?: number }).TOF || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else if (selector === "HighestDMT_EX") {
+          people.sort((a, b) => {
+            let aMax = 0;
+            let bMax = 0;
+            for (let eventName in a.Events) {
+              let event = a.Events[eventName];
+              let dmt_scores = Object.values(event.DMT_routines);
+              for (let scoreEntry of dmt_scores) {
+                aMax = Math.max(aMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
+              }
+            }
+            for (let eventName in b.Events) {
+              let event = b.Events[eventName];
+              let dmt_scores = Object.values(event.DMT_routines);
+              for (let scoreEntry of dmt_scores) {
+                bMax = Math.max(bMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
+              }
+            }
+            return bMax - aMax;
+          });
+        } else {
+          console.log("Unknown sort option, not sorting.");
+        }
+
+        return people;
+}
+
 function getResults(name: string, club: string) {
   let results = [];
 
@@ -180,6 +322,7 @@ function getResults(name: string, club: string) {
       results.push(person);
     }
   }
+  results = sortPeople(results);
   return results.slice(0, 20); // Limit to first 100 results
 }
 

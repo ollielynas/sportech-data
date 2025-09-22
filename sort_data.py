@@ -52,7 +52,7 @@ for row in data.itertuples(index=False):
             routine_data[row.Judge] = [row.S1, row.S2, row.S3, row.S4, row.S5, row.S6, row.S7, row.S8, row.S9, row.S10, row.L, row.A]
         if row.Judge in ["ESUM"]:
             routine_data["EX"] = [row.S1, row.S2, row.S3, row.S4, row.S5, row.S6, row.S7, row.S8, row.S9, row.S10, row.L, row.A]
-            routine_data["EX_total"] = row.SUM / 10
+            routine_data["EX_total"] = row.SUM
         if row.Judge in ["T"]:
             routine_data["TOF"] = row.SUM / 1000
         if row.Judge in ["D"]:
@@ -75,7 +75,7 @@ for row in data.itertuples(index=False):
             routine_data[row.Judge] = [row.S1, row.S2, row.L, row.A]
         if row.Judge in ["ESUM"]:
             routine_data["EX"] = [row.S1, row.S2, row.L, row.A]
-            routine_data["EX_total"] = row.SUM / 10
+            routine_data["EX_total"] = row.SUM
         if row.Judge in ["D"]:
             routine_data["DIF"] = row.SUM / 10
     
