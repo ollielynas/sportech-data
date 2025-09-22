@@ -1,4 +1,5 @@
 
+import gzip
 import json
 
 import pandas as pd
@@ -10,10 +11,12 @@ json_data = {}
 i = 0
 for row in data.itertuples(index=False):
     
-    name = row.GivenName + ' ' + row.Surname
+    name = (str(row.GivenName) + ' ' + str(row.Surname)).strip().lower()
+    name = ' '.join([part.capitalize() for part in name.split(' ')])
     event_key = row.Title + f" ({hash(row.Event_UUID)%1000})"
     routine_key = f"{row.Competition} {row.Stage} {row.Mark}" 
     if name not in json_data.keys():
+        print(f"Processing {name}")
         json_data[name] = {
             'GivenName': row.GivenName,
             'FamilyName': row.Surname,
@@ -74,11 +77,14 @@ for row in data.itertuples(index=False):
             routine_data["EX_total"] = row.SUM / 10
         if row.Judge in ["D"]:
             routine_data["DIF"] = row.SUM / 10
-        
-    i += 1
-    if i > 1000:
-        break
+    
+    # i += 1
+    # if i > 1000:
+    #     break
     row_data = {}
 json = json.dumps(json_data, indent=0)
 with open('mega_data.json', 'w') as f:
     f.write(json)
+    
+with gzip.open('sporttech_search/mega_data.json.gz', 'wt', encoding='utf-8') as zipfile:
+    zipfile.write(json)
