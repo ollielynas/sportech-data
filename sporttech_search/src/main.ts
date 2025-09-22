@@ -4,7 +4,7 @@ let keys: string[] = [];
 document.getElementById("load_data")?.addEventListener("click", () => {
   console.log("Fetching and loading the JSON file...");
 
-  fetch("./mega_data.json.gz")
+  fetch("./mega_data.json")
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok " + response.statusText);
