@@ -170,9 +170,11 @@ function getResults(name: string, club: string) {
     console.log("Checking key:", key);
     let person = jsonData[key];
     let fullName = (person.GivenName + " " + person.FamilyName).toLowerCase();
+    let lastName = person.FamilyName.toLowerCase();
     let clubs = person.Clubs.map((c: string) => c.toLowerCase());
     if (
       (name === "" || fullName.startsWith(name)) &&
+      (name === "" || lastName.startsWith(name)) &&
       (club === "" || clubs.some((c: string) => c.includes(club)))
     ) {
       results.push(person);
