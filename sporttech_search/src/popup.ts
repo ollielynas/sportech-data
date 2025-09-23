@@ -5,6 +5,7 @@ import { getResults } from "./main";
 
 
 function showPopup(data: any, routine: any, type: string) {
+  console.log("data", data.length);
   const popup = document.querySelector(".popup") as HTMLElement;
   popup.style.display = "block";
 
