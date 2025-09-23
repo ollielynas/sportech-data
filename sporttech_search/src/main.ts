@@ -1,3 +1,4 @@
+import { showPopup } from "./popup";
 import { sortPeople } from "./sort";
 
 let jsonData: any = {};
@@ -74,19 +75,12 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
     let Category = scoreEntry.Competition || "";
     let Routine = scoreEntry.Stage || "";
     // pad int with leading zeros
-    let E1 = (scoreEntry.E1 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E2 = (scoreEntry.E2 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E3 = (scoreEntry.E3 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E4 = (scoreEntry.E4 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
+    
     let li = document.createElement("button");
     li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} TOF:${TOF} DIF:${DIF} HD:${HD}`;
     li.className = "score-entry";
     li.onclick = () => {
-      alert(
-        `Details:\nCategory: ${Category}\nRoutine: ${Routine}\nScore: ${score}\nEX:${EX}\nTOF: ${TOF}\nDIF: ${DIF}\nHD: ${HD}`
-        + `\n      S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, L,  A`
-        + `\nE1: ${E1}\nE2: ${E2}\nE3: ${E3}\nE4: ${E4}`
-      );
+      showPopup(jsonData, scoreEntry, "TRA");
     };
 
     scoresDiv.appendChild(li);
@@ -110,19 +104,12 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
     let Category = scoreEntry.Competition || "";
     let Routine = scoreEntry.Stage || "";
     // pad int with leading zeros
-    let E1 = (scoreEntry.E1 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E2 = (scoreEntry.E2 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E3 = (scoreEntry.E3 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E4 = (scoreEntry.E4 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
+   
     let li = document.createElement("button");
     li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} DIF:${DIF}`;
     li.className = "score-entry";
     li.onclick = () => {
-      alert(
-        `Details:\nCategory: ${Category}\nRoutine: ${Routine}\nScore: ${score}\nEX:${EX}\nDIF: ${DIF}`
-        + `\n      S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, L,  A`
-        + `\nE1: ${E1}\nE2: ${E2}\nE3: ${E3}\nE4: ${E4}`
-      );
+      showPopup(jsonData, scoreEntry, "DMT");
     };
 
     scoresDiv.appendChild(li);
@@ -179,7 +166,7 @@ function totalPointsEver(person: any) {
 }
 
 
-function getResults(name: string, club: string, evt_in: string = "") {
+function getResults(name: string, club: string) {
   let results = [];
 
   name = name.trim().toLowerCase();
@@ -298,5 +285,5 @@ document.getElementById("search-button")?.addEventListener("click", () => {
 });
 
 
-export { totalPointsEver };
+export { getResults, totalPointsEver };
 

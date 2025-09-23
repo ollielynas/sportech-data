@@ -101,7 +101,7 @@ for link in links:
                 total_score = table.select_one('.score').text.strip()
                 routines[routine_key] = {
                     'Competition': event_title,
-                    'Stage': line_title.next_sibli,
+                    'Stage': line_title,
                     # add default value for int
                     # 'Score': int(Score.text.strip()),
                     'Score': float(Score.text.strip()) if Score.text.strip() else 0,
@@ -126,7 +126,7 @@ for link in links:
                 total_score = table.select_one('.score').text.strip()
                 routines[routine_key] = {
                     'Competition': event_title,
-                    'Stage': line_title.next_sibli,
+                    'Stage': line_title,
                     # add default value for int
                     # 'Score': int(Score.text.strip()),
                     'Score': float(Score.text.strip()) if Score.text.strip() else 0,

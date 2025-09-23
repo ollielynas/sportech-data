@@ -163,6 +163,30 @@ input[type="text"] {
   color: #444;
 }
 
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1px solid #bababa;
+  border-radius: 8px;
+  padding: 1rem;
+  width: 90dvw;
+  height: 90dvh;
+  overflow-y: auto;
+  box-shadow: 0 3px 19px rgba(0, 0, 0, 0.43);
+  z-index: 1000;
+}
+
+.popup #close-popup {
+  position: absolute;
+  top: 0.5rem;
+  right: 1.0rem;
+
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .inner {
