@@ -1,10 +1,10 @@
+import { sortPeople } from "./sort";
+
 let jsonData: any = {};
 let keys: string[] = [];
 
-document.getElementById("load_data")?.addEventListener("click", () => {
-  console.log("Fetching and loading the JSON file...");
-
-  fetch("./mega_data.json")
+function fetchJson(url: string) {
+    fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok " + response.statusText);
@@ -12,11 +12,22 @@ document.getElementById("load_data")?.addEventListener("click", () => {
       return response.json();
     })
     .then((data) => {
-      jsonData = data;
-      keys = Object.keys(jsonData).filter(
+      let new_keys = Object.keys(data).filter(
         (key) =>
           key !== "undefined" && key !== "" && key !== null && key !== "nan nan"
       );
+      for (let key of new_keys) {
+        if (!keys.includes(key)) {
+          keys.push(key);
+          jsonData[key] = data[key];
+        }else{
+          for (let ev in data[key].Events) {
+            jsonData[key].Events[ev] = data[key].Events[ev];
+            jsonData[key].Clubs = Array.from(new Set([...jsonData[key].Clubs, ...data[key].Clubs]));
+          }
+        }
+      }
+      console.log("Data successfully loaded. Number of athletes:", keys.length);
       document.getElementById(
         "details"
       )!.innerHTML = `Data loaded. ${keys.length} athletes available.`;
@@ -25,6 +36,14 @@ document.getElementById("load_data")?.addEventListener("click", () => {
       console.error("Error fetching the JSON file:", error);
     });
 
+}
+
+
+document.getElementById("load_data")?.addEventListener("click", () => {
+  console.log("Fetching and loading the JSON file...");
+
+  fetchJson("./scoreholder_data.json");
+  fetchJson("./mega_data.json");
   document.getElementById("load_data")?.setAttribute("style", "display:none");
   document
     .getElementById("search-window")
@@ -55,10 +74,10 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
     let Category = scoreEntry.Competition || "";
     let Routine = scoreEntry.Stage || "";
     // pad int with leading zeros
-    let E1 = scoreEntry.E1.map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E2 = scoreEntry.E2.map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E3 = scoreEntry.E3.map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
-    let E4 = scoreEntry.E4.map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
+    let E1 = (scoreEntry.E1 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
+    let E2 = (scoreEntry.E2 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
+    let E3 = (scoreEntry.E3 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
+    let E4 = (scoreEntry.E4 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("nan", " ") || "";
     let li = document.createElement("button");
     li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} TOF:${TOF} DIF:${DIF} HD:${HD}`;
     li.className = "score-entry";
@@ -91,10 +110,10 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
     let Category = scoreEntry.Competition || "";
     let Routine = scoreEntry.Stage || "";
     // pad int with leading zeros
-    let E1 = scoreEntry.E1.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E2 = scoreEntry.E2.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E3 = scoreEntry.E3.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
-    let E4 = scoreEntry.E4.map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
+    let E1 = (scoreEntry.E1 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
+    let E2 = (scoreEntry.E2 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
+    let E3 = (scoreEntry.E3 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
+    let E4 = (scoreEntry.E4 || [0]).map((n: number) => String(n).padStart(3, " ")).join(",").replace("Nan", " ") || "";
     let li = document.createElement("button");
     li.innerHTML = `${Category} - ${Routine} <br /> Score: ${score} EX:${EX} DIF:${DIF}`;
     li.className = "score-entry";
@@ -112,10 +131,10 @@ function displayScores(event: any, tra_scores: any[], dmt_scores: any[]) {
 }
 
 function getCompScores(event: any) {
-  let tra_scores = Object.keys(event.TRA_routines).map(
+  let tra_scores = Object.keys(event.TRA_routines || []).map(
     (key) => event.TRA_routines[key]
   );
-  let dmt_scores = Object.keys(event.DMT_routines).map(
+  let dmt_scores = Object.keys(event.DMT_routines || []).map(
     (key) => event.DMT_routines[key]
   );
   return displayScores(event, tra_scores, dmt_scores);
@@ -159,158 +178,17 @@ function totalPointsEver(person: any) {
   return total;
 }
 
-function sortPeople(people: any[]) {
-        //   <select name="Sort By" id="sort">
-        //   <option value="HighestTRA">Highest Tramp Score</option>
-        //   <option value="HighestTRA_EX">Highest Tramp EX</option>
-        //   <option value="HighestTRA_HD">Highest Tramp HD</option>
-        //   <option value="HighestTRA_TOF">Highest Tramp TOF</option>
-        //   <option value="HighestDMT_EX">Highest DMT EX</option>
-        //   <option value="HighestDMT">Highest DMT Score</option>
-        //   <option value="HighestTotal">Highest Total</option>
-          
-        // </select>
 
-        let selector = (document.getElementById("sort") as HTMLSelectElement).value;
-        console.log("Sorting by:", selector);
-        if (selector === "HighestTRA") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { Score?: number }).Score || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { Score?: number }).Score || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else if (selector === "HighestDMT") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let dmt_scores = Object.values(event.DMT_routines);
-              for (let scoreEntry of dmt_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { Score?: number }).Score || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let dmt_scores = Object.values(event.DMT_routines);
-              for (let scoreEntry of dmt_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { Score?: number }).Score || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else if (selector === "HighestTotal") {
-          people.sort((a, b) => totalPointsEver(b) - totalPointsEver(a));
-
-        } else if (selector === "HighestTRA_EX") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else if (selector === "HighestTRA_HD") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { HD?: number }).HD || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { HD?: number }).HD || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else if (selector === "HighestTRA_TOF") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { TOF?: number }).TOF || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let tra_scores = Object.values(event.TRA_routines);
-              for (let scoreEntry of tra_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { TOF?: number }).TOF || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else if (selector === "HighestDMT_EX") {
-          people.sort((a, b) => {
-            let aMax = 0;
-            let bMax = 0;
-            for (let eventName in a.Events) {
-              let event = a.Events[eventName];
-              let dmt_scores = Object.values(event.DMT_routines);
-              for (let scoreEntry of dmt_scores) {
-                aMax = Math.max(aMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
-              }
-            }
-            for (let eventName in b.Events) {
-              let event = b.Events[eventName];
-              let dmt_scores = Object.values(event.DMT_routines);
-              for (let scoreEntry of dmt_scores) {
-                bMax = Math.max(bMax, (scoreEntry as { EX_total?: number }).EX_total || 0);
-              }
-            }
-            return bMax - aMax;
-          });
-        } else {
-          console.log("Unknown sort option, not sorting.");
-        }
-
-        return people;
-}
-
-function getResults(name: string, club: string) {
+function getResults(name: string, club: string, evt_in: string = "") {
   let results = [];
 
   name = name.trim().toLowerCase();
   club = club.trim().toLowerCase();
   for (let key of keys) {
     console.log("Checking key:", key);
+    
     let person = jsonData[key];
+    
     let fullName = (person.GivenName + " " + person.FamilyName).toLowerCase();
     let lastName = person.FamilyName.toLowerCase();
     let clubs = person.Clubs.map((c: string) => c.toLowerCase());
@@ -418,3 +296,7 @@ document.getElementById("search-button")?.addEventListener("click", () => {
     res_div.appendChild(personDiv);
   }
 });
+
+
+export { totalPointsEver };
+
