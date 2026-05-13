@@ -12,39 +12,6 @@ function normalizeCategoryStr(s?: string): string {
     .trim();
 }
 
-function parseAgeToken(tok: string) {
-  if (!tok) return null;
-  if (/\d+\+$/.test(tok)) {
-    const lo = parseInt(tok.replace("+", ""), 10);
-    return { lo, hi: Infinity };
-  }
-  if (/^\d+-\d+$/.test(tok)) {
-    const [a, b] = tok.split("-").map((x) => parseInt(x, 10));
-    return { lo: a, hi: b };
-  }
-  if (/^\d+$/.test(tok)) {
-    const v = parseInt(tok, 10);
-    return { lo: v, hi: v };
-  }
-  return null;
-}
-
-function extractCategoryInfo(s?: string) {
-  const norm = normalizeCategoryStr(s);
-  const info: any = { raw: norm };
-  const ageMatch = norm.match(/\b\d{1,2}(?:-\d{1,2})?\+?\b/);
-  if (ageMatch) info.age = ageMatch[0];
-  if (/\bjunior\b/.test(norm)) info.levelDetail = "junior";
-  else if (/\bsenior\b/.test(norm)) info.levelDetail = "senior";
-  info.explicitInternational =
-    /\b(fig|international|junior international|sub junior international|youth international)\b/.test(
-      norm,
-    );
-  info.explicitNational =
-    /\bnational\b/.test(norm) && !info.explicitInternational;
-  return info;
-}
-
 function sameCategory(a?: string, b?: string) {
   return normalizeCategoryStr(a) === normalizeCategoryStr(b);
 }
