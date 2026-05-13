@@ -1,316 +1,491 @@
-// import plotly
-
 import Plotly from "plotly.js-dist-min";
 import { getResults } from "./main";
 
-
-function showPopup(data: any, routine: any, type: string) {
-  console.log("data", data.length);
-  const popup = document.querySelector(".popup") as HTMLElement;
-  popup.style.display = "block";
-
-  let E1 =
-    (routine.E1 || [0])
-      .map((n: number) => String(n).padStart(3, " "))
-      .join(",")
-      .replace("Nan", " ") || "";
-  let E2 =
-    (routine.E2 || [0])
-      .map((n: number) => String(n).padStart(3, " "))
-      .join(",")
-      .replace("Nan", " ") || "";
-  let E3 =
-    (routine.E3 || [0])
-      .map((n: number) => String(n).padStart(3, " "))
-      .join(",")
-      .replace("Nan", " ") || "";
-  let E4 =
-    (routine.E4 || [0])
-      .map((n: number) => String(n).padStart(3, " "))
-      .join(",")
-      .replace("Nan", " ") || "";
-
-  let score = routine.Score || 0;
-  let EX = routine.EX_total || 0;
-  let DIF = routine.DIF || 0;
-  
-
-  let Category = routine.Competition || "";
-  let Routine = routine.Stage || "";
-  let html = `<h2>Details</h2>
-    <p><strong>Type:</strong> ${type}</p>
-    <p><strong>Category:</strong> ${Category}</p>
-    <p><strong>Routine:</strong> ${Routine}</p>
-    <p><strong>Score:</strong> ${score}</p>
-    <p><strong>EX:</strong> ${EX}</p>
-${
-    (type === "TRA") ? `<p><strong>TOF:</strong> ${routine.TOF || ""}</p>
-    <p><strong>HD:</strong> ${routine.HD || ""}</p>` : ""
+function judgeRow(label: string, values: number[] | undefined): string {
+  if (!values || values.length === 0) return "";
+  const cells = values
+    .map((v) => `<span class="judge-score-val">${v ?? "—"}</span>`)
+    .join("");
+  return `
+    <div class="judge-row">
+      <span class="judge-label">${label}</span>
+      <div class="judge-scores">${cells}</div>
+    </div>`;
 }
-    <p><strong>DIF:</strong> ${DIF}</p>
-    <p><strong>E1:</strong> ${E1}</p>
-    <p><strong>E2:</strong> ${E2}</p>
-    <p><strong>E3:</strong> ${E3}</p>
-    <p><strong>E4:</strong> ${E4}</p>
 
-    <button id="close-popup">Close</button>
-    <br />
-    <h3>Filter Graph Data</h3>
-    <br/>
-        <label for="search-name">Filter by Name</label>
-        <input type="text" id="filter-search-name" placeholder="Name" />
-        <br />
-        <label for="filter-name">Filter by Club:</label>
-        <input type="text" id="filter-club" placeholder="Club" />
-        <br />
-        <button id="filter-graph-data">Update Graph Data</button>
-    <br />
-    <h4>Graphs</h4>
+function stat(label: string, value: string | number): string {
+  return `
+    <div class="popup-stat">
+      <div class="popup-stat-value">${value !== undefined && value !== "" ? value : "—"}</div>
+      <div class="popup-stat-label">${label}</div>
+    </div>`;
+}
 
-            <div id="score-graph"></div>
-    <div id="tof-graph"></div>
-    <div id="ex-graph"></div>
-    <div id="dif-graph"></div>
-    <div id="hd-graph"></div>
-    `;
-  popup.innerHTML = html;
+function showPopup(
+  _data: any,
+  routine: any,
+  type: string,
+  eventMeta?: { Title?: string; StartDate?: string },
+) {
+  const popup = document.getElementById("popup") as HTMLElement;
+  const overlay = document.getElementById("popup-overlay") as HTMLElement;
+  popup.style.display = "flex";
+  overlay.style.display = "block";
 
-    
-    
-    const filterBtn = document.getElementById("filter-graph-data") as HTMLElement;
-    filterBtn.onclick = () => {
-        const nameInput = document.getElementById("filter-search-name") as HTMLInputElement;
-        const clubInput = document.getElementById("filter-club") as HTMLInputElement;
+  const score = routine.Score ?? 0;
+  const EX = routine.EX_total ? routine.EX_total.toFixed(1) : "0";
+  const DIF = routine.DIF ? routine.DIF.toFixed(1) : "0";
+  const TOF = routine.TOF ? routine.TOF.toFixed(3) : "";
+  const HD = routine.HD ? routine.HD.toFixed(1) : "";
+  const cat = routine.Competition || "";
+  const stage = routine.Stage || "";
 
-        let filteredData = getResults(nameInput.value, clubInput.value);
-        plotGraphs(filteredData, routine, type, score);
+  const traSuffix = type === "TRA" ? stat("TOF", TOF) + stat("HD", HD) : "";
+
+  const evTitle = eventMeta?.Title ?? "";
+  const evDate = eventMeta?.StartDate
+    ? " · " + eventMeta.StartDate.slice(0, 10)
+    : "";
+
+  popup.innerHTML = `
+    <div class="popup-header">
+      <h2>${type} — ${cat} · ${stage}${evTitle ? " <span style='opacity:0.6;font-weight:400;'>" + evTitle + evDate + "</span>" : ""}</h2>
+      <button id="close-popup" class="btn btn-ghost btn-sm"
+        style="color:#fff;border-color:rgba(255,255,255,0.25);">✕ Close</button>
+    </div>
+
+    <div class="popup-body">
+      <div class="popup-stats">
+        ${stat("Score", score)}
+        ${stat("EX", EX)}
+        ${traSuffix}
+        ${stat("DIF", DIF)}
+      </div>
+
+      <div class="judge-table">
+        ${judgeRow("E1", routine.E1)}
+        ${judgeRow("E2", routine.E2)}
+        ${judgeRow("E3", routine.E3)}
+        ${judgeRow("E4", routine.E4)}
+      </div>
+
+      <div class="popup-filter">
+        <div class="field">
+          <label>Filter by Name</label>
+          <input type="text" id="filter-search-name" placeholder="Name…" />
+        </div>
+        <div class="field">
+          <label>Filter by Club</label>
+          <input type="text" id="filter-club" placeholder="Club…" />
+        </div>
+        <button id="filter-graph-data" class="btn btn-primary btn-sm">Update Graphs</button>
+      </div>
+
+      <div class="graphs-grid">
+        <div class="graph-card" id="score-graph"></div>
+        ${type === "TRA" ? '<div class="graph-card" id="tof-graph"></div>' : ""}
+        <div class="graph-card" id="ex-graph"></div>
+        ${type === "TRA" ? '<div class="graph-card" id="hd-graph"></div>' : ""}
+        <div class="graph-card" id="dif-graph"></div>
+      </div>
+    </div>`;
+
+  document.getElementById("filter-graph-data")!.onclick = () => {
+    const nameVal = (
+      document.getElementById("filter-search-name") as HTMLInputElement
+    ).value;
+    const clubVal = (document.getElementById("filter-club") as HTMLInputElement)
+      .value;
+    plotGraphs(getResults(nameVal, clubVal), routine, type, score);
+  };
+
+  // Auto-plot with empty filters
+  plotGraphs(getResults("", ""), routine, type, score);
+
+  document.getElementById("close-popup")!.onclick = hidePopup;
+  overlay.onclick = hidePopup;
+}
+
+function showRoutinePopup(group: any) {
+  const popup = document.getElementById("popup") as HTMLElement;
+  const overlay = document.getElementById("popup-overlay") as HTMLElement;
+  popup.style.display = "flex";
+  overlay.style.display = "block";
+
+  const occurrences = [...group.occurrences].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
+  const hasTof = occurrences.some((o) => o.tof > 0);
+
+  popup.innerHTML = `
+    <div class="popup-header">
+      <h2>${group.type} Routine · DIF ${group.difficultyKey}</h2>
+      <button id="close-popup" class="btn btn-ghost btn-sm"
+        style="color:#fff;border-color:rgba(255,255,255,0.25);">Close</button>
+    </div>
+
+    <div class="popup-body">
+      <div class="routine-popup-subtitle">Grouped by exact difficulty value.</div>
+      <div class="popup-stats">
+        ${stat("Routines", group.occurrenceCount)}
+        ${stat("First Date", group.firstDate || "—")}
+        ${stat("Last Date", group.lastDate || "—")}
+        ${stat("Avg Score", group.avgScore ? group.avgScore.toFixed(3) : "—")}
+        ${stat("Avg DIF", group.avgDifficulty ? group.avgDifficulty.toFixed(3) : "—")}
+        ${stat("Avg TOF", group.avgTof ? group.avgTof.toFixed(3) : "—")}
+      </div>
+
+      <div class="graphs-grid routine-graphs-grid">
+        <div class="graph-card" id="routine-score-graph"></div>
+        <div class="graph-card" id="routine-ex-graph"></div>
+        ${hasTof ? '<div class="graph-card" id="routine-hd-graph"></div>' : ""}
+        ${hasTof ? '<div class="graph-card" id="routine-tof-graph"></div>' : ""}
+        <div class="graph-card routine-box-card" id="routine-skills-graph"></div>
+      </div>
+
+      ${
+        group.competitions.length
+          ? `
+      <div class="routine-competitions-list">
+        <div class="competitions-label">Competitions</div>
+        <div class="competitions-items">${group.competitions.map((comp: any) => `<div class="competition-item">${comp.event} - ${comp.competition}</div>`).join("")}</div>
+      </div>
+      `
+          : ""
+      }
+    </div>`;
+
+  const scoreTrace: Partial<Plotly.PlotData> = {
+    x: occurrences.map((o) => o.date),
+    y: occurrences.map((o) => o.score),
+    text: occurrences.map((o) => `${o.event}<br>Click for details`),
+    hoverinfo: "y+text",
+    type: "scatter",
+    mode: "lines+markers",
+    marker: { size: 8, color: "#6366f1" },
+    line: { color: "#6366f1", width: 2 },
+    name: "Score",
+  };
+
+  Plotly.newPlot(
+    "routine-score-graph",
+    [scoreTrace] as Plotly.Data[],
+    {
+      ...LAYOUT_BASE,
+      title: { text: "Score Trend", font: { size: 13, color: "#0f172a" } },
+      xaxis: { title: { text: "Date" } },
+      yaxis: { title: { text: "Score" } },
+    },
+    { responsive: true },
+  );
+
+  const scoreContainer = document.getElementById(
+    "routine-score-graph",
+  ) as HTMLElement;
+  scoreContainer.addEventListener("plotly_click", (data: any) => {
+    const pointIndex = data.points?.[0]?.pointNumber;
+    if (pointIndex !== undefined && occurrences[pointIndex]) {
+      const occ = occurrences[pointIndex];
+      showPopup(null, occ.routine, occ.type, occ.evMeta);
     }
+  });
 
-    filterBtn.click();
+  const exTrace: Partial<Plotly.PlotData> = {
+    x: occurrences.map((o) => o.date),
+    y: occurrences.map((o) => o.ex),
+    text: occurrences.map((o) => `${o.event}<br>Click for details`),
+    hoverinfo: "y+text",
+    type: "scatter",
+    mode: "lines+markers",
+    marker: { size: 8, color: "#10b981" },
+    line: { color: "#10b981", width: 2 },
+    name: "EX",
+  };
 
-  const closeBtn = document.getElementById("close-popup") as HTMLElement;
-  closeBtn.onclick = hidePopup;
+  Plotly.newPlot(
+    "routine-ex-graph",
+    [exTrace] as Plotly.Data[],
+    {
+      ...LAYOUT_BASE,
+      title: { text: "EX Trend", font: { size: 13, color: "#0f172a" } },
+      xaxis: { title: { text: "Date" } },
+      yaxis: { title: { text: "EX" } },
+    },
+    { responsive: true },
+  );
+
+  const exContainer = document.getElementById(
+    "routine-ex-graph",
+  ) as HTMLElement;
+  exContainer.addEventListener("plotly_click", (data: any) => {
+    const pointIndex = data.points?.[0]?.pointNumber;
+    if (pointIndex !== undefined && occurrences[pointIndex]) {
+      const occ = occurrences[pointIndex];
+      showPopup(null, occ.routine, occ.type, occ.evMeta);
+    }
+  });
+
+  if (hasTof) {
+    const hdTrace: Partial<Plotly.PlotData> = {
+      x: occurrences.map((o) => o.date),
+      y: occurrences.map((o) => o.hd),
+      text: occurrences.map((o) => `${o.event}<br>Click for details`),
+      hoverinfo: "y+text",
+      type: "scatter",
+      mode: "lines+markers",
+      marker: { size: 8, color: "#ec4899" },
+      line: { color: "#ec4899", width: 2 },
+      name: "HD",
+    };
+
+    Plotly.newPlot(
+      "routine-hd-graph",
+      [hdTrace] as Plotly.Data[],
+      {
+        ...LAYOUT_BASE,
+        title: { text: "HD Trend", font: { size: 13, color: "#0f172a" } },
+        xaxis: { title: { text: "Date" } },
+        yaxis: { title: { text: "HD" } },
+      },
+      { responsive: true },
+    );
+
+    const hdContainer = document.getElementById(
+      "routine-hd-graph",
+    ) as HTMLElement;
+    hdContainer.addEventListener("plotly_click", (data: any) => {
+      const pointIndex = data.points?.[0]?.pointNumber;
+      if (pointIndex !== undefined && occurrences[pointIndex]) {
+        const occ = occurrences[pointIndex];
+        showPopup(null, occ.routine, occ.type, occ.evMeta);
+      }
+    });
+
+    const tofTrace: Partial<Plotly.PlotData> = {
+      x: occurrences.map((o) => o.date),
+      y: occurrences.map((o) => o.tof),
+      text: occurrences.map((o) => `${o.event}<br>Click for details`),
+      hoverinfo: "y+text",
+      type: "scatter",
+      mode: "lines+markers",
+      marker: { size: 8, color: "#f59e0b" },
+      line: { color: "#f59e0b", width: 2 },
+      name: "TOF",
+    };
+
+    Plotly.newPlot(
+      "routine-tof-graph",
+      [tofTrace] as Plotly.Data[],
+      {
+        ...LAYOUT_BASE,
+        title: { text: "TOF Trend", font: { size: 13, color: "#0f172a" } },
+        xaxis: { title: { text: "Date" } },
+        yaxis: { title: { text: "TOF" } },
+      },
+      { responsive: true },
+    );
+
+    const tofContainer = document.getElementById(
+      "routine-tof-graph",
+    ) as HTMLElement;
+    tofContainer.addEventListener("plotly_click", (data: any) => {
+      const pointIndex = data.points?.[0]?.pointNumber;
+      if (pointIndex !== undefined && occurrences[pointIndex]) {
+        const occ = occurrences[pointIndex];
+        showPopup(null, occ.routine, occ.type, occ.evMeta);
+      }
+    });
+  }
+
+  const palette = [
+    "#6366f1",
+    "#10b981",
+    "#f59e0b",
+    "#ec4899",
+    "#8b5cf6",
+    "#06b6d4",
+    "#ef4444",
+    "#14b8a6",
+    "#a855f7",
+    "#f97316",
+    "#64748b",
+    "#0f766e",
+  ];
+
+  const boxTraces = group.skillLabels
+    .filter((label: string) => group.skillSeries[label]?.length)
+    .map((label: string, index: number) => ({
+      y: group.skillSeries[label],
+      type: "box",
+      name: label,
+      boxpoints: false,
+      marker: { color: palette[index % palette.length] },
+      line: { color: palette[index % palette.length] },
+      fillcolor: palette[index % palette.length],
+      opacity: 0.85,
+      quartilemethod: "exclusive",
+    }));
+
+  const meanTrace: Partial<Plotly.PlotData> = {
+    x: group.skillLabels.filter(
+      (label: string) => group.skillSeries[label]?.length,
+    ),
+    y: group.skillLabels
+      .filter((label: string) => group.skillSeries[label]?.length)
+      .map((label: string) => group.skillAverages[label]),
+    type: "scatter",
+    mode: "lines+markers",
+    name: "Average",
+    line: { color: "#0f172a", width: 2.5, dash: "solid" },
+    marker: { size: 8, color: "#0f172a", symbol: "diamond" },
+  };
+
+  Plotly.newPlot(
+    "routine-skills-graph",
+    [...boxTraces, meanTrace] as Plotly.Data[],
+    {
+      ...LAYOUT_BASE,
+      title: {
+        text: "Skill Execution Box Plot",
+        font: { size: 13, color: "#0f172a" },
+      },
+      xaxis: { title: { text: "Skill" } },
+      yaxis: { title: { text: "Execution score" } },
+      boxmode: "group",
+    },
+    { responsive: true },
+  );
+
+  document.getElementById("close-popup")!.onclick = hidePopup;
+  overlay.onclick = hidePopup;
+}
+
+/* ── Graph helpers ───────────────────────────────────────── */
+
+const LAYOUT_BASE: Partial<Plotly.Layout> = {
+  margin: { t: 36, r: 12, b: 40, l: 40 },
+  paper_bgcolor: "transparent",
+  plot_bgcolor: "transparent",
+  font: { family: "Inter, Segoe UI, sans-serif", size: 11, color: "#64748b" },
+};
+
+function histogram(
+  containerId: string,
+  values: number[],
+  markerColor: string,
+  title: string,
+  xLabel: string,
+  markerLine: number,
+) {
+  if (!values.length || !document.getElementById(containerId)) return;
+
+  const trace: Partial<Plotly.PlotData> = {
+    x: values,
+    type: "histogram",
+    marker: { color: markerColor, opacity: 0.8 },
+  };
+
+  Plotly.newPlot(
+    containerId,
+    [trace] as Plotly.Data[],
+    {
+      ...LAYOUT_BASE,
+      title: { text: title, font: { size: 13, color: "#0f172a" } },
+      xaxis: { title: { text: xLabel } },
+      yaxis: { title: { text: "Count" } },
+      shapes: [
+        {
+          type: "line",
+          x0: markerLine,
+          x1: markerLine,
+          y0: 0,
+          y1: 1,
+          yref: "paper",
+          line: { color: "#ef4444", width: 2, dash: "dash" },
+        },
+      ],
+    },
+    { staticPlot: true, responsive: true },
+  );
 }
 
 function plotGraphs(data: any, routine: any, type: string, score: number) {
+  const scores: number[] = [];
+  const exScores: number[] = [];
+  const tofScores: number[] = [];
+  const difScores: number[] = [];
+  const hdScores: number[] = [];
 
-  let scores = [];
-  let ex_scores = [];
-  let tof_scores = [];
-  let dif_scores = [];
-  let hd_scores = [];
-
-  for (let key of Object.keys(data)) {
-    let person = data[key];
-    for (let eventName in person.Events) {
-      let event = person.Events[eventName];
-      let routine_scores = Object.values((type === "TRA")? event.TRA_routines : event.DMT_routines);
-      for (let scoreEntry of routine_scores) {
-        const entry = scoreEntry as {
-          HD?: number;
-          TOF?: number;
-          Score?: number;
-          EX_total?: number;
-          DIF?: number;
-        };
-        if (entry.Score !== undefined && entry.Score > 0) {
-          scores.push(entry.Score);
+  for (const person of data) {
+    for (const evName in person.Events) {
+      const ev = person.Events[evName];
+      const routines = Object.values(
+        type === "TRA" ? ev.TRA_routines : ev.DMT_routines,
+      ) as any[];
+      for (const r of routines) {
+        if (r.Score > 0) scores.push(r.Score);
+        if (r.EX_total > 0) exScores.push(r.EX_total);
+        if (r.DIF > 0) difScores.push(r.DIF);
+        if (type === "TRA") {
+          if (r.TOF > 1) tofScores.push(r.TOF);
+          if (r.HD > 1) hdScores.push(r.HD);
         }
-
-        if (entry.EX_total !== undefined && entry.EX_total > 0) {
-            ex_scores.push(entry.EX_total || 0);
-        }
-          
-          
-          if (entry.DIF !== undefined && entry.DIF > 0) {
-              dif_scores.push(entry.DIF || 0);
-          }
-          if (type === "TRA") {
-            if (entry.TOF !== undefined && entry.TOF > 1) {
-            tof_scores.push(entry.TOF || 0);
-            }
-            if (entry.HD !== undefined && entry.HD > 1) {
-            hd_scores.push(entry.HD || 0);
-        }
-        }
-        
       }
     }
   }
 
-
-var trace: Partial<Plotly.PlotData> = {
-  x: scores,
-  type: "histogram",
-  name: "Total Score",
-  marker: { color: "blue" },
-  opacity: 0.7,
-xbins: { 
-    start: Math.min(...scores), 
-    end: Math.max(...scores), 
-    size: 0.5 // set bin size to 0.1 for finer granularity
-    },
-};
-
-var d = [trace];
-Plotly.newPlot(
-  "score-graph",
-  d as Plotly.Data[],
-  {
-    title: { text: "Score Distribution" },
-    xaxis: { title: { text: "Score" } },
-    yaxis: { title: { text: "Count" } },
-    shapes: [
-      {
-        type: "line",
-        x0: score,
-        x1: score,
-        y0: 0,
-        y1: 1,
-        yref: "paper",
-        line: { color: "red", width: 2, dash: "dash" },
-      },
-    ],
-  },
-  { staticPlot: true }
-);
-if (type === "TRA") {
-  var trace2: Partial<Plotly.PlotData> = {
-    x: tof_scores,
-    type: "histogram",
-    name: "TOF Score",
-    marker: { color: "green" },
-    opacity: 0.7,
-    xbins: { 
-    start: Math.min(...scores), 
-    end: Math.max(...scores), 
-    size: 0.5 // set bin size to 0.1 for finer granularity
-    },
-    };
-    var d2 = [trace2];
-    Plotly.newPlot(
-        "tof-graph",
-        d2 as Plotly.Data[],
-        {
-            title: { text: "TOF Distribution" },
-            xaxis: { title: { text: "TOF" } },
-            yaxis: { title: { text: "Count" } },
-            shapes: [
-                {
-                    type: "line",
-                    x0: routine.TOF || 0,
-                    x1: routine.TOF || 0,
-                    y0: 0,
-                    y1: 1,
-                    yref: "paper",
-                    line: { color: "red", width: 2, dash: "dash" },
-                },
-            ],
-        },
-        { staticPlot: true }
-    );
-    var trace3: Partial<Plotly.PlotData> = {
-        x: hd_scores,
-        type: "histogram",
-        name: "HD Score",
-        marker: { color: "orange" },
-        opacity: 0.7,
-    };
-    var d3 = [trace3];
-    Plotly.newPlot(
-        "hd-graph",
-        d3 as Plotly.Data[],
-        {
-            title: { text: "HD Distribution" },
-            xaxis: { title: { text: "HD" } },
-            yaxis: { title: { text: "Count" } },
-            shapes: [
-                {
-                    type: "line",
-                    x0: routine.HD || 0,
-                    x1: routine.HD || 0,
-                    y0: 0,
-                    y1: 1,
-                    yref: "paper",
-                    line: { color: "red", width: 2, dash: "dash" },
-                },
-            ],
-        },
-        { staticPlot: true }
-    );
-}
-var trace4: Partial<Plotly.PlotData> = {
-    x: ex_scores,
-    type: "histogram",
-    name: "EX Score",
-    marker: { color: "purple" },
-    opacity: 0.7,
-};
-var d4 = [trace4];
-Plotly.newPlot(
+  histogram(
+    "score-graph",
+    scores,
+    "#6366f1",
+    "Score Distribution",
+    "Score",
+    score,
+  );
+  histogram(
     "ex-graph",
-    d4 as Plotly.Data[],
-    {
-        title: { text: "EX Distribution" },
-        xaxis: { title: { text: "EX" } },
-        yaxis: { title: { text: "Count" } },
-        shapes: [
-            {
-                type: "line",
-                x0: routine.EX_total || 0,
-                x1: routine.EX_total || 0,
-                y0: 0,
-                y1: 1,
-                yref: "paper",
-                line: { color: "red", width: 2, dash: "dash" },
-            },
-        ],
-    },
-    { staticPlot: true }
-);
-var trace5: Partial<Plotly.PlotData> = {
-    x: dif_scores,
-    type: "histogram",
-    name: "DIF Score",
-    marker: { color: "pink" },
-    xbins: { 
-    start: Math.min(...dif_scores), 
-    end: Math.max(...dif_scores), 
-    size: 0.5 // set bin size to 0.1 for finer granularity
-    },
-    opacity: 0.7,
-};
-var d5 = [trace5];
-Plotly.newPlot(
+    exScores,
+    "#10b981",
+    "EX Distribution",
+    "EX",
+    routine.EX_total || 0,
+  );
+  histogram(
     "dif-graph",
-    d5 as Plotly.Data[],
-    {
-        title: { text: "DIF Distribution" },
-        xaxis: { title: { text: "DIF" } },
-        yaxis: { title: { text: "Count" } },
-        shapes: [
-            {
-                type: "line",
-                x0: routine.DIF || 0,
-                x1: routine.DIF || 0,
-                y0: 0,
-                y1: 1,
-                yref: "paper",
-                line: { color: "red", width: 2, dash: "dash" },
-            },
-        ],
-    },
-    { staticPlot: true }
-);
+    difScores,
+    "#ec4899",
+    "DIF Distribution",
+    "DIF",
+    routine.DIF || 0,
+  );
 
+  if (type === "TRA") {
+    histogram(
+      "tof-graph",
+      tofScores,
+      "#f59e0b",
+      "TOF Distribution",
+      "TOF",
+      routine.TOF || 0,
+    );
+    histogram(
+      "hd-graph",
+      hdScores,
+      "#8b5cf6",
+      "HD Distribution",
+      "HD",
+      routine.HD || 0,
+    );
+  }
 }
-
 
 function hidePopup() {
-  const popup = document.querySelector(".popup") as HTMLElement;
+  const popup = document.getElementById("popup") as HTMLElement;
+  const overlay = document.getElementById("popup-overlay") as HTMLElement;
   popup.style.display = "none";
   popup.innerHTML = "";
+  overlay.style.display = "none";
+  overlay.onclick = null;
 }
 
-export { showPopup };
-
+export { showPopup, showRoutinePopup };

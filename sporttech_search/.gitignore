@@ -7,16 +7,52 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
 node_modules
 dist
 dist-ssr
 *.local
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Test output
+coverage
+*.lcov
+
+# Build/cache output
+.cache
+.parcel-cache
+.vite
+*.tsbuildinfo
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

@@ -1,71 +1,116 @@
 <!doctype html>
 <html lang="en">
-  <!-- I need this to rerun the build command -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/src/style.css" />
     <title>SportTech Search</title>
   </head>
   <body>
-    <h2>SportTech Search</h2>
-    <div class="inner">
-    <div class="left">
-      
-      <div class="data">
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="topbar-title">SportTech Search</span>
       </div>
-      <div id="search-window" style="display:none;">
 
-      <!-- labeld input box with search button umder it -->
-        <br />
-        <label for="search-name">Search by Name:</label>
-        <input type="text" id="search-name" placeholder="Name" />
-        <br />
-        <label for="search-name">Search by Club:</label>
-        <input type="text" id="search-club" placeholder="Name" />
-        <br />
-        <label for="search-name">Sort By</label>
-        <select name="Sort By" id="sort">
-          
-          <option value="SelectSort" >Select Sorting</option>
-          <option value="HighestTotal">Highest Total</option>
-          <option value="HighestTRA">Highest Tramp Score</option>
-          <option value="HighestTRA_EX">Highest Tramp EX</option>
-          <option value="HighestTRA_HD">Highest Tramp HD</option>
-          <option value="HighestTRA_DIF">Highest Tramp DIF</option>
-          <option value="HighestTRA_TOF">Highest Tramp TOF</option>
-          <option value="HighestDMT_EX">Highest DMT EX</option>
-          <option value="HighestDMT_DIF">Highest DMT DIF</option>
-          <option value="HighestDMT">Highest DMT Score</option>
-        </select>
-        <br />
-        <br />
-        <button id="search-button">Search</button>
-        <div id="results">
+      <!-- Mobile header search area (visible only on small viewports) -->
+      <div id="mobile-search-btn" class="mobile-search-btn">Search athletes…</div>
 
+      <p id="details" class="topbar-status">Loading…</p>
+    </header>
+    <div id="mobile-sidebar-backdrop" class="mobile-sidebar-backdrop"></div>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+        <!-- Sidebar tab bar -->
+        <div class="sidebar-tabs-bar">
+          <button
+            class="sidebar-tab-btn active"
+            data-sidebar-tab="search"
+            aria-pressed="true"
+          >
+            <span class="sidebar-tab-label">Search</span>
+          </button>
+
+          <button
+            class="sidebar-tab-btn"
+            data-sidebar-tab="recent"
+            aria-pressed="false"
+          >
+            <span class="sidebar-tab-label">Recent</span>
+          </button>
         </div>
 
-
-
-      </div>
-      <button id="load_data">Load Data</button>
-    </div>
-    <div class="right">
-      <div id="profile">
-
-      </div>
-    </div>
-    </div>
-    <p id="details">Data not loaded</p>
-
-
-    <div class="popup" style="display:none;" id="popup">
-      
+        <!-- Search panel -->
+        <div id="search-panel">
+          <div id="search-loading" class="load-prompt">
+            <p>Loading data…</p>
+          </div>
+          <div id="search-window" style="display: none">
+            <div class="search-section">
+              <label for="search-name">Name</label>
+              <div class="ac-wrap">
+                <input
+                  type="text"
+                  id="search-name"
+                  placeholder="Search by name…"
+                  autocomplete="off"
+                />
+              </div>
+              <label for="search-club">Club</label>
+              <div class="ac-wrap">
+                <input
+                  type="text"
+                  id="search-club"
+                  placeholder="Search by club…"
+                  autocomplete="off"
+                />
+              </div>
+              <label for="sort">Sort by</label>
+              <select id="sort">
+                <option value="SelectSort">Default</option>
+                <option value="HighestTotal">Highest Total</option>
+                <option value="HighestTRA">Highest Tramp Score</option>
+                <option value="HighestTRA_EX">Highest Tramp EX</option>
+                <option value="HighestTRA_HD">Highest Tramp HD</option>
+                <option value="HighestTRA_DIF">Highest Tramp DIF</option>
+                <option value="HighestTRA_TOF">Highest Tramp TOF</option>
+                <option value="HighestDMT_EX">Highest DMT EX</option>
+                <option value="HighestDMT_DIF">Highest DMT DIF</option>
+                <option value="HighestDMT">Highest DMT Score</option>
+              </select>
+              <button id="search-button" class="btn btn-primary btn-full">
+                Search
+              </button>
+            </div>
+            <div id="results"></div>
+          </div>
         </div>
-      
+
+        <!-- Recent panel -->
+        <div id="recent-panel" style="display: none">
+          <div id="recent-list" class="recent-list">
+            <div class="load-prompt">
+              <p>No recently viewed athletes yet.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div id="profile" class="empty-state">
+          <p>Select an athlete to view their profile</p>
+        </div>
+      </main>
     </div>
 
-    </div>
+    <div class="popup-overlay" style="display: none" id="popup-overlay"></div>
+    <div class="popup" style="display: none" id="popup"></div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

@@ -1,4 +1,5 @@
 import time
+from datetime import date
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -13,14 +14,20 @@ driver = webdriver.Chrome(options=options)
 
 event_links = []
 
-for year in range(2022, 2026):
+current_year = date.today().year
+for year in range(2022, current_year + 1):
     url = f"https://sporttech.io/explore?year={year}&country=NZL&sport=TRA"
     print(f"Processing URL: {url}")
     driver.get(url)
     time.sleep(3)
-    
+
     events = driver.find_elements(By.CSS_SELECTOR, ".event-name a")
-    links = ["https://sporttech.io" + e.get_attribute("href") if e.get_attribute("href").startswith("/") else e.get_attribute("href") for e in events]
+    links = [
+        "https://sporttech.io" + e.get_attribute("href")
+        if e.get_attribute("href").startswith("/")
+        else e.get_attribute("href")
+        for e in events
+    ]
     print(f"Found {len(links)} links for year {year}")
     event_links.extend(links)
 

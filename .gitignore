@@ -1,0 +1,21 @@
+# Generated pipeline artifacts (reproducible)
+csv/
+mega_data.csv
+mega_data.json
+
+# Python caches / virtual envs
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Keep runtime data used by Cloudflare Pages deploy:
+#!sporttech_search/public/mega_data.json
+#!sporttech_search/public/mega_data.json.gz
+#!sporttech_search/public/scoreholder_data.json
