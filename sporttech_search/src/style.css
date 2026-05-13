@@ -145,7 +145,10 @@ body {
   cursor: pointer;
   font-weight: 800;
   color: var(--text-muted);
-  transition: background var(--transition), color var(--transition), transform var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition);
 }
 
 .sidebar-toggle-btn:hover {
@@ -1210,7 +1213,7 @@ select {
     z-index: 220;
     padding: 1rem;
     transition: left 0.28s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
     background: var(--surface);
   }
 
@@ -1222,7 +1225,7 @@ select {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     z-index: 210;
   }
 
@@ -1238,25 +1241,27 @@ select {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     padding: 0.45rem 0.75rem;
     border-radius: 999px;
     color: var(--topbar-text);
     font-size: 0.95rem;
     cursor: text;
-    border: 1px solid rgba(255,255,255,0.03);
+    border: 1px solid rgba(255, 255, 255, 0.03);
     width: 100%;
     max-width: 520px;
     box-shadow: none;
   }
 
   .mobile-search-btn::before {
-    content: '🔍';
+    content: "🔍";
     opacity: 0.85;
     margin-right: 0.5rem;
   }
 
-  .mobile-sidebar-toggle:active { transform: translateY(1px); }
+  .mobile-sidebar-toggle:active {
+    transform: translateY(1px);
+  }
 
   .stats-strip {
     gap: 0.4rem;

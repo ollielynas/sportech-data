@@ -509,7 +509,13 @@ function showGraphView(person: any, container: HTMLElement) {
   };
   const tra: Pt[] = [];
   const dmt: Pt[] = [];
-  type CompPt = { date: string; val: number; label: string };
+  type CompPt = {
+    date: string;
+    val: number;
+    label: string;
+    routine: any;
+    evMeta: any;
+  };
   // TRA components
   const ex: CompPt[] = [];
   const tof: CompPt[] = [];
@@ -586,7 +592,7 @@ function showGraphView(person: any, container: HTMLElement) {
 
     graph.style.cursor = "pointer";
 
-    const traces: Partial<Plotly.PlotData>[] = [];
+    const traces: any[] = [];
     if (type === "TRA") {
       const setPoints = points.filter((p) => Number(p.routine?.DIF ?? 0) === 0);
       const volPoints = points.filter((p) => Number(p.routine?.DIF ?? 0) !== 0);
@@ -653,7 +659,7 @@ function showGraphView(person: any, container: HTMLElement) {
   plotScoreGraph(dmt, "DMT Scores Over Time", "#10b981", "DMT");
 
   // ── TRA component chart ──
-  const compTraces: Partial<Plotly.PlotData>[] = [];
+  const compTraces: any[] = [];
   if (ex.length)
     compTraces.push({
       x: ex.map((p) => p.date),
@@ -703,7 +709,7 @@ function showGraphView(person: any, container: HTMLElement) {
       marker: { size: 8, color: "#8b5cf6" },
     });
 
-  function plotCompGraph(traces: Partial<Plotly.PlotData>[], title: string, type: "TRA" | "DMT") {
+  function plotCompGraph(traces: any[], title: string, type: "TRA" | "DMT") {
     if (!traces.length) return;
     const card = document.createElement("div");
     card.className = "scores-section";
@@ -750,7 +756,7 @@ function showGraphView(person: any, container: HTMLElement) {
   plotCompGraph(compTraces, "TRA Components Over Time", "TRA");
 
   // ── DMT component chart ──
-  const dmtCompTraces: Partial<Plotly.PlotData>[] = [];
+  const dmtCompTraces: any[] = [];
   if (dmtEx.length)
     dmtCompTraces.push({
       x: dmtEx.map((p) => p.date),
