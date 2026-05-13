@@ -330,6 +330,28 @@ button {
   cursor: not-allowed;
 }
 
+/* Minimal mobile tap-confirm popup */
+.mobile-click-confirm {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.5);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-click-confirm-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
 /* ===== Search section ===== */
 .search-panel-header {
   display: flex;

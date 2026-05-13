@@ -175,18 +175,43 @@ function showRoutinePopup(group: any) {
       title: { text: "Score Trend", font: { size: 13, color: "#0f172a" } },
       xaxis: { title: { text: "Date" } },
       yaxis: { title: { text: "Score" } },
+      dragmode: false as any,
+    } as any as Plotly.Layout,
+    {
+      responsive: true,
+      scrollZoom: false,
+      displaylogo: false,
+      modeBarButtonsToRemove: [
+        "zoom2d",
+        "pan2d",
+        "select2d",
+        "lasso2d",
+        "zoomIn2d",
+        "zoomOut2d",
+        "autoScale2d",
+        "resetScale2d",
+      ],
     },
-    { responsive: true },
   );
 
   const scoreContainer = document.getElementById(
     "routine-score-graph",
   ) as HTMLElement;
   scoreContainer.addEventListener("plotly_click", (data: any) => {
+    const ev = data.event;
+    const clientX = ev?.clientX;
+    const clientY = ev?.clientY;
     const pointIndex = data.points?.[0]?.pointNumber;
     if (pointIndex !== undefined && occurrences[pointIndex]) {
       const occ = occurrences[pointIndex];
-      showPopup(null, occ.routine, occ.type, occ.evMeta);
+      // on mobile require a confirmation tap
+      (window as any).confirmTap
+        ? (window as any).confirmTap(
+            () => showPopup(null, occ.routine, occ.type, occ.evMeta),
+            clientX,
+            clientY,
+          )
+        : showPopup(null, occ.routine, occ.type, occ.evMeta);
     }
   });
 
@@ -210,8 +235,23 @@ function showRoutinePopup(group: any) {
       title: { text: "EX Trend", font: { size: 13, color: "#0f172a" } },
       xaxis: { title: { text: "Date" } },
       yaxis: { title: { text: "EX" } },
+      dragmode: false as any,
+    } as any as Plotly.Layout,
+    {
+      responsive: true,
+      scrollZoom: false,
+      displaylogo: false,
+      modeBarButtonsToRemove: [
+        "zoom2d",
+        "pan2d",
+        "select2d",
+        "lasso2d",
+        "zoomIn2d",
+        "zoomOut2d",
+        "autoScale2d",
+        "resetScale2d",
+      ],
     },
-    { responsive: true },
   );
 
   const exContainer = document.getElementById(
@@ -246,8 +286,23 @@ function showRoutinePopup(group: any) {
         title: { text: "HD Trend", font: { size: 13, color: "#0f172a" } },
         xaxis: { title: { text: "Date" } },
         yaxis: { title: { text: "HD" } },
+        dragmode: false as any,
+      } as any as Plotly.Layout,
+      {
+        responsive: true,
+        scrollZoom: false,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+          "zoom2d",
+          "pan2d",
+          "select2d",
+          "lasso2d",
+          "zoomIn2d",
+          "zoomOut2d",
+          "autoScale2d",
+          "resetScale2d",
+        ],
       },
-      { responsive: true },
     );
 
     const hdContainer = document.getElementById(
@@ -281,8 +336,23 @@ function showRoutinePopup(group: any) {
         title: { text: "TOF Trend", font: { size: 13, color: "#0f172a" } },
         xaxis: { title: { text: "Date" } },
         yaxis: { title: { text: "TOF" } },
+        dragmode: false as any,
+      } as any as Plotly.Layout,
+      {
+        responsive: true,
+        scrollZoom: false,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+          "zoom2d",
+          "pan2d",
+          "select2d",
+          "lasso2d",
+          "zoomIn2d",
+          "zoomOut2d",
+          "autoScale2d",
+          "resetScale2d",
+        ],
       },
-      { responsive: true },
     );
 
     const tofContainer = document.getElementById(
@@ -352,8 +422,23 @@ function showRoutinePopup(group: any) {
       xaxis: { title: { text: "Skill" } },
       yaxis: { title: { text: "Execution score" } },
       boxmode: "group",
+      dragmode: false as any,
+    } as any as Plotly.Layout,
+    {
+      responsive: true,
+      scrollZoom: false,
+      displaylogo: false,
+      modeBarButtonsToRemove: [
+        "zoom2d",
+        "pan2d",
+        "select2d",
+        "lasso2d",
+        "zoomIn2d",
+        "zoomOut2d",
+        "autoScale2d",
+        "resetScale2d",
+      ],
     },
-    { responsive: true },
   );
 
   document.getElementById("close-popup")!.onclick = hidePopup;

@@ -1,6 +1,9 @@
 import Plotly from "plotly.js-dist-min";
+import { confirmTap } from "./mobileConfirm";
 import { showPopup, showRoutinePopup } from "./popup";
 import { sortPeople } from "./sort";
+
+(window as any).confirmTap = confirmTap;
 
 let jsonData: any = {};
 let keys: string[] = [];
@@ -540,10 +543,14 @@ function showGraphView(person: any, container: HTMLElement) {
           routine: r,
           evMeta: ev,
         });
-      if ((r.EX_total ?? 0) > 0) ex.push({ date, val: r.EX_total, label, routine: r, evMeta: ev });
-      if ((r.TOF ?? 0) > 0) tof.push({ date, val: r.TOF, label, routine: r, evMeta: ev });
-      if ((r.DIF ?? 0) > 0) dif.push({ date, val: r.DIF, label, routine: r, evMeta: ev });
-      if ((r.HD ?? 0) > 0) hd.push({ date, val: r.HD, label, routine: r, evMeta: ev });
+      if ((r.EX_total ?? 0) > 0)
+        ex.push({ date, val: r.EX_total, label, routine: r, evMeta: ev });
+      if ((r.TOF ?? 0) > 0)
+        tof.push({ date, val: r.TOF, label, routine: r, evMeta: ev });
+      if ((r.DIF ?? 0) > 0)
+        dif.push({ date, val: r.DIF, label, routine: r, evMeta: ev });
+      if ((r.HD ?? 0) > 0)
+        hd.push({ date, val: r.HD, label, routine: r, evMeta: ev });
     }
     for (const r of Object.values(ev.DMT_routines) as any[]) {
       if ((r.Score ?? 0) > 0)
@@ -554,8 +561,10 @@ function showGraphView(person: any, container: HTMLElement) {
           routine: r,
           evMeta: ev,
         });
-      if ((r.EX_total ?? 0) > 0) dmtEx.push({ date, val: r.EX_total, label, routine: r, evMeta: ev });
-      if ((r.DIF ?? 0) > 0) dmtDif.push({ date, val: r.DIF, label, routine: r, evMeta: ev });
+      if ((r.EX_total ?? 0) > 0)
+        dmtEx.push({ date, val: r.EX_total, label, routine: r, evMeta: ev });
+      if ((r.DIF ?? 0) > 0)
+        dmtDif.push({ date, val: r.DIF, label, routine: r, evMeta: ev });
     }
   }
 
@@ -602,7 +611,10 @@ function showGraphView(person: any, container: HTMLElement) {
           x: setPoints.map((p) => p.date),
           y: setPoints.map((p) => p.score),
           text: setPoints.map((p) => p.label),
-          customdata: setPoints.map((p) => ({ routine: p.routine, evMeta: p.evMeta })),
+          customdata: setPoints.map((p) => ({
+            routine: p.routine,
+            evMeta: p.evMeta,
+          })),
           hoverinfo: "y+text",
           type: "scatter",
           mode: "markers",
@@ -615,7 +627,10 @@ function showGraphView(person: any, container: HTMLElement) {
           x: volPoints.map((p) => p.date),
           y: volPoints.map((p) => p.score),
           text: volPoints.map((p) => p.label),
-          customdata: volPoints.map((p) => ({ routine: p.routine, evMeta: p.evMeta })),
+          customdata: volPoints.map((p) => ({
+            routine: p.routine,
+            evMeta: p.evMeta,
+          })),
           hoverinfo: "y+text",
           type: "scatter",
           mode: "markers",
@@ -627,7 +642,10 @@ function showGraphView(person: any, container: HTMLElement) {
         x: points.map((p) => p.date),
         y: points.map((p) => p.score),
         text: points.map((p) => p.label),
-        customdata: points.map((p) => ({ routine: p.routine, evMeta: p.evMeta })),
+        customdata: points.map((p) => ({
+          routine: p.routine,
+          evMeta: p.evMeta,
+        })),
         hoverinfo: "y+text",
         type: "scatter",
         mode: "markers",
@@ -643,15 +661,62 @@ function showGraphView(person: any, container: HTMLElement) {
         showlegend: type === "TRA",
         xaxis: { title: { text: "Date" } },
         yaxis: { title: { text: "Score" } },
+        // disable drag/zoom
+        dragmode: false as any,
+      } as any as Plotly.Layout,
+      {
+        responsive: true,
+        scrollZoom: false,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+          "zoom2d",
+          "pan2d",
+          "select2d",
+          "lasso2d",
+          "zoomIn2d",
+          "zoomOut2d",
+          "autoScale2d",
+          "resetScale2d",
+        ],
       },
-      { responsive: true },
     );
 
     (graph as any).on("plotly_click", (data: any) => {
       const point = data.points?.[0];
       if (!point) return;
+      const ev = data.event;
+      const clientX = ev?.clientX;
+      const clientY = ev?.clientY;
       const custom = point.customdata;
-      if (custom?.routine) showPopup(jsonData, custom.routine, type, custom.evMeta);
+      if (custom?.routine) {
+        confirmTap(
+          () => showPopup(jsonData, custom.routine, type, custom.evMeta),
+          clientX,
+          clientY,
+        );
+        return;
+      }
+      // fallback: try to match by date and value if customdata missing
+      const idx = point.pointIndex;
+      const traceIdx = point.curveNumber;
+      const ptsArray = traces[traceIdx] as any;
+      if (ptsArray && ptsArray.x && ptsArray.y && idx !== undefined) {
+        // try to find a matching routine in score arrays by date
+        const date = ptsArray.x[idx];
+        const val = ptsArray.y[idx];
+        // search in tra/dmt arrays depending on type
+        const pool = type === "TRA" ? tra : dmt;
+        const found = pool.find(
+          (p) =>
+            p.date === date && (p.score === val || p.score === Number(val)),
+        );
+        if (found)
+          confirmTap(
+            () => showPopup(jsonData, found.routine, type, found.evMeta),
+            clientX,
+            clientY,
+          );
+      }
     });
   }
 
@@ -725,16 +790,38 @@ function showGraphView(person: any, container: HTMLElement) {
         ...CHART_LAYOUT_BASE,
         xaxis: { title: { text: "Date" } },
         yaxis: { title: { text: "Value" } },
+        dragmode: false as any,
+      } as any as Plotly.Layout,
+      {
+        responsive: true,
+        scrollZoom: false,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+          "zoom2d",
+          "pan2d",
+          "select2d",
+          "lasso2d",
+          "zoomIn2d",
+          "zoomOut2d",
+          "autoScale2d",
+          "resetScale2d",
+        ],
       },
-      { responsive: true },
     );
     // enable clicking on component points to open the routine popup
     (graph as any).on("plotly_click", (data: any) => {
       const point = data.points?.[0];
       if (!point) return;
+      const ev = data.event;
+      const clientX = ev?.clientX;
+      const clientY = ev?.clientY;
       const custom = point.customdata;
       if (custom && custom.routine) {
-        showPopup(jsonData, custom.routine, type, custom.evMeta);
+        confirmTap(
+          () => showPopup(jsonData, custom.routine, type, custom.evMeta),
+          clientX,
+          clientY,
+        );
         return;
       }
       // fallback: try to match by date and value if customdata missing
@@ -747,8 +834,16 @@ function showGraphView(person: any, container: HTMLElement) {
         const val = ptsArray.y[idx];
         // search in tra/dmt arrays depending on type
         const pool = type === "TRA" ? tra : dmt;
-        const found = pool.find((p) => p.date === date && (p.score === val || p.score === Number(val)));
-        if (found) showPopup(jsonData, found.routine, type, found.evMeta);
+        const found = pool.find(
+          (p) =>
+            p.date === date && (p.score === val || p.score === Number(val)),
+        );
+        if (found)
+          confirmTap(
+            () => showPopup(jsonData, found.routine, type, found.evMeta),
+            clientX,
+            clientY,
+          );
       }
     });
   }
@@ -1253,9 +1348,14 @@ document.getElementById("search-toggle-btn")?.addEventListener("click", () => {
 });
 
 // Restore search box state from localStorage
-const searchExpanded = localStorage.getItem("sportech_search_expanded") !== "false";
-const searchWindow = document.getElementById("search-window") as HTMLElement | null;
-const toggleBtn = document.getElementById("search-toggle-btn") as HTMLElement | null;
+const searchExpanded =
+  localStorage.getItem("sportech_search_expanded") !== "false";
+const searchWindow = document.getElementById(
+  "search-window",
+) as HTMLElement | null;
+const toggleBtn = document.getElementById(
+  "search-toggle-btn",
+) as HTMLElement | null;
 
 if (!searchExpanded && searchWindow) {
   searchWindow.style.display = "none";
@@ -1264,55 +1364,68 @@ if (!searchExpanded && searchWindow) {
 
 // Keep toggle icon text in sync with state (only if toggle exists)
 if (toggleBtn) {
-  const toggleIcon = toggleBtn.querySelector('.toggle-icon') as HTMLElement | null;
-  if (toggleIcon) toggleIcon.innerText = toggleBtn.classList.contains('collapsed') ? '>>' : '<<';
+  const toggleIcon = toggleBtn.querySelector(
+    ".toggle-icon",
+  ) as HTMLElement | null;
+  if (toggleIcon)
+    toggleIcon.innerText = toggleBtn.classList.contains("collapsed")
+      ? ">>"
+      : "<<";
 
   // Update icon on clicks as well
-  toggleBtn.addEventListener('click', () => {
-    const icon = toggleBtn.querySelector('.toggle-icon') as HTMLElement | null;
-    if (icon) icon.innerText = toggleBtn.classList.contains('collapsed') ? '>>' : '<<';
+  toggleBtn.addEventListener("click", () => {
+    const icon = toggleBtn.querySelector(".toggle-icon") as HTMLElement | null;
+    if (icon)
+      icon.innerText = toggleBtn.classList.contains("collapsed") ? ">>" : "<<";
   });
 }
 
 /* Mobile sidebar toggle (header search) */
-const mobileSearchBtn = document.getElementById('mobile-search-btn') as HTMLElement | null;
-const mobileBackdrop = document.getElementById('mobile-sidebar-backdrop') as HTMLElement | null;
-const sidebar = document.querySelector('.sidebar') as HTMLElement | null;
+const mobileSearchBtn = document.getElementById(
+  "mobile-search-btn",
+) as HTMLElement | null;
+const mobileBackdrop = document.getElementById(
+  "mobile-sidebar-backdrop",
+) as HTMLElement | null;
+const sidebar = document.querySelector(".sidebar") as HTMLElement | null;
 
 function setMobileSidebar(open: boolean) {
   if (!sidebar) return;
   if (open) {
-    sidebar.classList.add('mobile-open');
-    mobileBackdrop?.classList.add('visible');
-    if (mobileBackdrop) mobileBackdrop.style.display = 'block';
-    localStorage.setItem('sportech_sidebar_mobile_open', 'true');
+    sidebar.classList.add("mobile-open");
+    mobileBackdrop?.classList.add("visible");
+    if (mobileBackdrop) mobileBackdrop.style.display = "block";
+    localStorage.setItem("sportech_sidebar_mobile_open", "true");
   } else {
-    sidebar.classList.remove('mobile-open');
-    mobileBackdrop?.classList.remove('visible');
-    if (mobileBackdrop) mobileBackdrop.style.display = 'none';
-    localStorage.setItem('sportech_sidebar_mobile_open', 'false');
+    sidebar.classList.remove("mobile-open");
+    mobileBackdrop?.classList.remove("visible");
+    if (mobileBackdrop) mobileBackdrop.style.display = "none";
+    localStorage.setItem("sportech_sidebar_mobile_open", "false");
   }
 }
 
 // Open sidebar when mobile header search is tapped; focus real search input inside sidebar
-mobileSearchBtn?.addEventListener('click', () => {
+mobileSearchBtn?.addEventListener("click", () => {
   setMobileSidebar(true);
   // focus the actual search input after opening
   setTimeout(() => {
-    const input = document.getElementById('search-name') as HTMLInputElement | null;
+    const input = document.getElementById(
+      "search-name",
+    ) as HTMLInputElement | null;
     input?.focus();
   }, 250);
 });
 
-mobileBackdrop?.addEventListener('click', () => setMobileSidebar(false));
+mobileBackdrop?.addEventListener("click", () => setMobileSidebar(false));
 
 // Close mobile sidebar with Escape key
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') setMobileSidebar(false);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") setMobileSidebar(false);
 });
 
 // Restore mobile sidebar state
-const mobileOpen = localStorage.getItem('sportech_sidebar_mobile_open') === 'true';
+const mobileOpen =
+  localStorage.getItem("sportech_sidebar_mobile_open") === "true";
 if (mobileOpen) setMobileSidebar(true);
 
 export { getResults, totalPointsEver };
