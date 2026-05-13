@@ -42,52 +42,7 @@ function extractCategoryInfo(s?: string) {
     );
   info.explicitNational =
     /\bnational\b/.test(norm) && !info.explicitInternational;
-  if (/\b(female|women|woman)\b/.test(norm)) info.gender = "female";
-  else if (/\b(male|men|man)\b/.test(norm)) info.gender = "male";
-  if (/\bfig\b/.test(norm)) info.level = "fig";
-  else if (/junior.*international|junior international/.test(norm))
-    info.level = "junior_international";
-  else if (/\binternational\b/.test(norm)) info.level = "international";
-  else if (/\bnational\b/.test(norm)) info.level = "national";
-  else if (/\bsecondary\b|\bschool\b/.test(norm)) info.level = "secondary";
-
-  const stop = new Set([
-    "years",
-    "year",
-    "and",
-    "the",
-    "championships",
-    "championship",
-    "competition",
-    "age",
-    "trampoline",
-    "tramp",
-    "female",
-    "male",
-    "fig",
-    "junior",
-    "international",
-    "national",
-    "secondary",
-    "school",
-    "over",
-    "u",
-    "o",
-  ]);
-
-  info.tokens = new Set(
-    norm.split(" ").filter((t) => t && !stop.has(t) && t.length > 1),
-  );
-
   return info;
-}
-
-function ageRangesOverlap(a?: string, b?: string) {
-  if (!a || !b) return false;
-  const pa = parseAgeToken(a);
-  const pb = parseAgeToken(b);
-  if (!pa || !pb) return false;
-  return pa.lo <= pb.hi && pb.lo <= pa.hi;
 }
 
 function sameCategory(a?: string, b?: string) {
@@ -568,6 +523,10 @@ function histogram(
     type: "histogram",
     marker: { color: markerColor, opacity: 0.8 },
   };
+  (trace as any).nbinsx = Math.min(
+    30,
+    Math.max(100, Math.ceil(Math.sqrt(values.length)) + 2),
+  );
 
   Plotly.newPlot(
     containerId,
@@ -620,8 +579,6 @@ function plotGraphs(
           const b = `${routine.Competition || ""}`;
           if (!sameCategory(a, b)) {
             continue;
-          } else {
-            console.log(r.Score, a, b);
           }
         }
 
