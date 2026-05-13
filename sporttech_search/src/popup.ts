@@ -1,6 +1,99 @@
 import Plotly from "plotly.js-dist-min";
 import { getResults } from "./main";
 
+// --- Category matching helpers ---
+function normalizeCategoryStr(s?: string): string {
+  if (!s) return "";
+  return s
+    .replace(/&amp;/g, "and")
+    .toLowerCase()
+    .replace(/[^a-z0-9+\- ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseAgeToken(tok: string) {
+  if (!tok) return null;
+  if (/\d+\+$/.test(tok)) {
+    const lo = parseInt(tok.replace("+", ""), 10);
+    return { lo, hi: Infinity };
+  }
+  if (/^\d+-\d+$/.test(tok)) {
+    const [a, b] = tok.split("-").map((x) => parseInt(x, 10));
+    return { lo: a, hi: b };
+  }
+  if (/^\d+$/.test(tok)) {
+    const v = parseInt(tok, 10);
+    return { lo: v, hi: v };
+  }
+  return null;
+}
+
+function extractCategoryInfo(s?: string) {
+  const norm = normalizeCategoryStr(s);
+  const info: any = { raw: norm };
+  const ageMatch = norm.match(/\b\d{1,2}(?:-\d{1,2})?\+?\b/);
+  if (ageMatch) info.age = ageMatch[0];
+  if (/\bjunior\b/.test(norm)) info.levelDetail = "junior";
+  else if (/\bsenior\b/.test(norm)) info.levelDetail = "senior";
+  info.explicitInternational =
+    /\b(fig|international|junior international|sub junior international|youth international)\b/.test(
+      norm,
+    );
+  info.explicitNational =
+    /\bnational\b/.test(norm) && !info.explicitInternational;
+  if (/\b(female|women|woman)\b/.test(norm)) info.gender = "female";
+  else if (/\b(male|men|man)\b/.test(norm)) info.gender = "male";
+  if (/\bfig\b/.test(norm)) info.level = "fig";
+  else if (/junior.*international|junior international/.test(norm))
+    info.level = "junior_international";
+  else if (/\binternational\b/.test(norm)) info.level = "international";
+  else if (/\bnational\b/.test(norm)) info.level = "national";
+  else if (/\bsecondary\b|\bschool\b/.test(norm)) info.level = "secondary";
+
+  const stop = new Set([
+    "years",
+    "year",
+    "and",
+    "the",
+    "championships",
+    "championship",
+    "competition",
+    "age",
+    "trampoline",
+    "tramp",
+    "female",
+    "male",
+    "fig",
+    "junior",
+    "international",
+    "national",
+    "secondary",
+    "school",
+    "over",
+    "u",
+    "o",
+  ]);
+
+  info.tokens = new Set(
+    norm.split(" ").filter((t) => t && !stop.has(t) && t.length > 1),
+  );
+
+  return info;
+}
+
+function ageRangesOverlap(a?: string, b?: string) {
+  if (!a || !b) return false;
+  const pa = parseAgeToken(a);
+  const pb = parseAgeToken(b);
+  if (!pa || !pb) return false;
+  return pa.lo <= pb.hi && pb.lo <= pa.hi;
+}
+
+function sameCategory(a?: string, b?: string) {
+  return normalizeCategoryStr(a) === normalizeCategoryStr(b);
+}
+
 function judgeRow(label: string, values: number[] | undefined): string {
   if (!values || values.length === 0) return "";
   const cells = values
@@ -78,6 +171,9 @@ function showPopup(
           <label>Filter by Club</label>
           <input type="text" id="filter-club" placeholder="Club…" />
         </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="filter-same-category" checked /> Only compare same category</label>
+        </div>
         <button id="filter-graph-data" class="btn btn-primary btn-sm">Update Graphs</button>
       </div>
 
@@ -96,11 +192,14 @@ function showPopup(
     ).value;
     const clubVal = (document.getElementById("filter-club") as HTMLInputElement)
       .value;
-    plotGraphs(getResults(nameVal, clubVal), routine, type, score);
+    const sameCat = (
+      document.getElementById("filter-same-category") as HTMLInputElement
+    ).checked;
+    plotGraphs(getResults(nameVal, clubVal), routine, type, score, sameCat);
   };
 
-  // Auto-plot with empty filters
-  plotGraphs(getResults("", ""), routine, type, score);
+  // Auto-plot with empty filters (compare same category by default)
+  plotGraphs(getResults("", ""), routine, type, score, true);
 
   document.getElementById("close-popup")!.onclick = hidePopup;
   overlay.onclick = hidePopup;
@@ -494,7 +593,13 @@ function histogram(
   );
 }
 
-function plotGraphs(data: any, routine: any, type: string, score: number) {
+function plotGraphs(
+  data: any,
+  routine: any,
+  type: string,
+  score: number,
+  sameCategoryOnly: boolean = true,
+) {
   const scores: number[] = [];
   const exScores: number[] = [];
   const tofScores: number[] = [];
@@ -508,6 +613,18 @@ function plotGraphs(data: any, routine: any, type: string, score: number) {
         type === "TRA" ? ev.TRA_routines : ev.DMT_routines,
       ) as any[];
       for (const r of routines) {
+        // If user requested same-category comparison, skip routines not in the
+        // same (fuzzy) Competition+Stage as the selected routine
+        if (sameCategoryOnly) {
+          const a = `${r.Competition || ""}`;
+          const b = `${routine.Competition || ""}`;
+          if (!sameCategory(a, b)) {
+            continue;
+          } else {
+            console.log(r.Score, a, b);
+          }
+        }
+
         if (r.Score > 0) scores.push(r.Score);
         if (r.EX_total > 0) exScores.push(r.EX_total);
         if (r.DIF > 0) difScores.push(r.DIF);

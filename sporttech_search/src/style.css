@@ -352,6 +352,46 @@ button {
   font-weight: 700;
 }
 
+.scores-section-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  opacity: 0.9;
+}
+
+@media (max-width: 640px) {
+  .scores-section-hint {
+    font-size: 13px;
+    color: var(--text-light);
+  }
+}
+
+/* Global hint banner at top of graph view */
+.scores-global-hint {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(245, 158, 11, 0.95),
+    rgba(255, 138, 60, 0.95)
+  );
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  margin: 0.5rem 1rem 1rem 1rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 640px) {
+  .scores-global-hint {
+    font-size: 15px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0.5rem 1rem 0.5rem;
+  }
+}
+
 /* ===== Search section ===== */
 .search-panel-header {
   display: flex;

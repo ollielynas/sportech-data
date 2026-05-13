@@ -500,6 +500,12 @@ function showGraphView(person: any, container: HTMLElement) {
   container.innerHTML = "";
   const scoresDiv = document.createElement("div");
   scoresDiv.id = "scores-div";
+  // global hint banner for graph view
+  const globalHint = document.createElement("div");
+  globalHint.className = "scores-global-hint";
+  globalHint.innerText =
+    "Tip: Tap or click the dots in the charts to open a detailed analysis.";
+  scoresDiv.appendChild(globalHint);
   container.appendChild(scoresDiv);
 
   // Gather per-event, per-routine data points
