@@ -254,15 +254,75 @@
     "StartDate": "2025-02-23T00:00:00Z",
     "EndDate": "2025-02-23T00:00:00Z"
   },
-  "463f33e7-9de1-442e-7ef4-646662ca6f75": {
-    "Title": "Superbounce 2026",
-    "StartDate": "2026-05-16T00:00:00Z",
-    "EndDate": "2026-05-17T00:00:00Z"
+  "566e287c-f921-4f90-5a8d-2bece0fa7723": {
+    "Title": "NZ 2026 XP Gymnastics Nationals",
+    "StartDate": "2026-09-29T00:00:00Z",
+    "EndDate": "2026-10-04T00:00:00Z"
+  },
+  "ba809837-9fd2-41a2-50c0-4fb065c56a56": {
+    "Title": "TCI#4 2026 CSG",
+    "StartDate": "2026-09-06T00:00:00Z",
+    "EndDate": "2026-09-06T00:00:00Z"
+  },
+  "bbfcbc79-90f5-4bba-5daf-235d8c3412e5": {
+    "Title": "CSG Trampoline Classic 2026",
+    "StartDate": "2026-08-15T00:00:00Z",
+    "EndDate": "2026-08-16T00:00:00Z"
+  },
+  "eae3cd0a-80b3-42f5-7156-821cd59d4425": {
+    "Title": "NZ NHG Championships 2026",
+    "StartDate": "2026-08-07T00:00:00Z",
+    "EndDate": "2026-08-09T00:00:00Z"
+  },
+  "b2cc5013-0dfa-4341-6002-31db3891875c": {
+    "Title": "Midlands TRA & TUM Competition",
+    "StartDate": "2026-08-01T00:00:00Z",
+    "EndDate": "2026-08-02T00:00:00Z"
+  },
+  "1d884674-1379-49cd-6e56-f4d09feca62a": {
+    "Title": "North Island Championships",
+    "StartDate": "2026-06-20T00:00:00Z",
+    "EndDate": "2026-06-21T00:00:00Z"
+  },
+  "77555f6a-59c4-4b49-723a-16fd6e69c205": {
+    "Title": "NZ Manawatu Gymsports Tumbling 2026",
+    "StartDate": "2026-06-14T00:00:00Z",
+    "EndDate": "2026-06-28T00:00:00Z"
+  },
+  "ec4917e8-4c61-4334-71ce-0e76929fced2": {
+    "Title": "Auckland Secondary Schools",
+    "StartDate": "2026-06-11T00:00:00Z",
+    "EndDate": "2026-06-11T00:00:00Z"
+  },
+  "1ea9232f-29e4-44c8-464d-3f535d97917e": {
+    "Title": "Wellington Tumbling Championships",
+    "StartDate": "2026-06-07T00:00:00Z",
+    "EndDate": "2026-06-07T00:00:00Z"
+  },
+  "ecec7834-d949-4858-4eba-653e06c0b27e": {
+    "Title": "NZ 2026 South Island Championships",
+    "StartDate": "2026-06-06T00:00:00Z",
+    "EndDate": "2026-06-07T00:00:00Z"
+  },
+  "aaccee50-9b38-4f1e-4510-dcaa6d9daacc": {
+    "Title": "South Island Tumbling Championships",
+    "StartDate": "2026-06-05T00:00:00Z",
+    "EndDate": "2026-06-05T00:00:00Z"
+  },
+  "b22ca299-f694-4c74-7a6d-99b3354e37ad": {
+    "Title": "NZ 2026 Tri Star Trampoline and DMT Championships",
+    "StartDate": "2026-05-24T00:00:00Z",
+    "EndDate": "2026-05-24T00:00:00Z"
   },
   "444966a0-72a1-4952-40e3-f54642086f65": {
     "Title": "CMG Tumble Champs",
     "StartDate": "2026-05-23T00:00:00Z",
     "EndDate": "2026-05-23T00:00:00Z"
+  },
+  "463f33e7-9de1-442e-7ef4-646662ca6f75": {
+    "Title": "Superbounce 2026",
+    "StartDate": "2026-05-16T00:00:00Z",
+    "EndDate": "2026-05-17T00:00:00Z"
   },
   "4f315fcf-e35c-47b5-4498-8c710296f327": {
     "Title": "MIGs Tumble Competition",
